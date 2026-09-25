@@ -65,7 +65,7 @@ const loginController = async(req, res) => {
         if(!isMatch){
             return res.status(500).send({
                 success:false,
-                message:'Invalid Successfully',
+                message:'Invalid Password',
             });
         }
         //token
