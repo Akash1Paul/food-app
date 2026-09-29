@@ -10,7 +10,7 @@ const resturantSchema = new mongoose.Schema({
         type: String,
         default: ' '
     },
-    foods: { type: array },
+    foods: { type: Array },
     time: {
         type: String,
     },
