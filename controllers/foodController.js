@@ -1,6 +1,6 @@
 const foodModal = require("../models/foodModal");
 const orderModel = require("../models/orderModel");
-
+const AppError = require("../utils/AppError");
 // CREATE FOOD
 const createFoodController = async (req, res) => {
     try {
@@ -57,11 +57,9 @@ const getAllFoodsController = async (req, res) => {
     try {
         const foods = await foodModal.find({});
         if (!foods) {
-            return res.status(404).send({
-                success: false,
-                message: "no food items was found",
-            });
+            throw new AppError("no food items was found", 404);
         }
+
         res.status(200).send({
             success: true,
             totalFoods: foods.length,
@@ -78,52 +76,54 @@ const getAllFoodsController = async (req, res) => {
 };
 
 // GET SINGLE FOOD
-const getSingleFoodController = async (req, res) => {
+const getSingleFoodController = async (req, res, next) => {
     try {
         const foodId = req.params.id;
+        // if (!foodId) {
+        //     return res.status(404).send({
+        //         success: false,
+        //         message: "please provide id",
+        //     });
+        // }
         if (!foodId) {
-            return res.status(404).send({
-                success: false,
-                message: "please provide id",
-            });
+            throw new AppError("please provide id", 404);
         }
+
         const food = await foodModal.findById(foodId);
+        // if (!food) {
+        //     return res.status(404).send({
+        //         success: false,
+        //         message: "No Food Found with htis id",
+        //     });
+        // }
         if (!food) {
-            return res.status(404).send({
-                success: false,
-                message: "No Food Found with htis id",
-            });
+            throw new AppError("No Food Found with htis id", 404);
         }
         res.status(200).send({
             success: true,
             food,
         });
     } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            success: false,
-            message: "Error In get SIngle Food API",
-            error,
-        });
+        next(error);
     }
 };
 
 // GET FOOD BY RESTURANT
-const getFoodByResturantController = async (req, res) => {
+const getFoodByResturantController = async (req, res, next) => {
     try {
         const resturantId = req.params.id;
         if (!resturantId) {
-            return res.status(404).send({
-                success: false,
-                message: "please provide id",
-            });
+            throw new AppError("please provide id", 404);
         }
         const food = await foodModal.find({ resturnat: resturantId });
+        // if (!food) {
+        //     return res.status(404).send({
+        //         success: false,
+        //         message: "No Food Found with htis id",
+        //     });
+        // }
         if (!food) {
-            return res.status(404).send({
-                success: false,
-                message: "No Food Found with htis id",
-            });
+            throw new AppError("No Food Found with htis id", 404);
         }
         res.status(200).send({
             success: true,
@@ -131,31 +131,32 @@ const getFoodByResturantController = async (req, res) => {
             food,
         });
     } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            success: false,
-            message: "Error In get SIngle Food API",
-            error,
-        });
+        next(error);
     }
 };
 
 // UPDATE FOOD ITEm
-const updateFoodController = async (req, res) => {
+const updateFoodController = async (req, res, next) => {
     try {
         const foodID = req.params.id;
-        if (!foodID) {
-            return res.status(404).send({
-                success: false,
-                message: "no food id was found",
-            });
+        // if (!foodID) {
+        //     return res.status(404).send({
+        //         success: false,
+        //         message: "no food id was found",
+        //     });
+        // }
+        if (!food) {
+            throw new AppError("no food id was found", 404);
         }
         const food = await foodModal.findById(foodID);
+        // if (!food) {
+        //     return res.status(404).send({
+        //         success: false,
+        //         message: "No Food Found",
+        //     });
+        // }
         if (!food) {
-            return res.status(404).send({
-                success: false,
-                message: "No Food Found",
-            });
+            throw new AppError("No Food Found", 404);
         }
         const {
             title,
@@ -190,12 +191,7 @@ const updateFoodController = async (req, res) => {
             message: "Food Item Was Updated",
         });
     } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            success: false,
-            message: "Erorr In Update Food API",
-            error,
-        });
+        next(error);
     }
 };
 
@@ -203,18 +199,24 @@ const updateFoodController = async (req, res) => {
 const deleteFoodController = async (req, res) => {
     try {
         const foodId = req.params.id;
+        // if (!foodId) {
+        //     return res.status(404).send({
+        //         success: false,
+        //         message: "provide food id",
+        //     });
+        // }
         if (!foodId) {
-            return res.status(404).send({
-                success: false,
-                message: "provide food id",
-            });
+            throw new AppError("provide food id", 404);
         }
         const food = await foodModal.findById(foodId);
+        // if (!food) {
+        //     return res.status(404).send({
+        //         success: false,
+        //         message: "No Food Found with id",
+        //     });
+        // }
         if (!food) {
-            return res.status(404).send({
-                success: false,
-                message: "No Food Found with id",
-            });
+            throw new AppError("No Food Found with id", 404);
         }
         await foodModal.findByIdAndDelete(foodId);
         res.status(200).send({
@@ -235,11 +237,14 @@ const deleteFoodController = async (req, res) => {
 const placeOrderController = async (req, res) => {
     try {
         const { cart } = req.body;
+        // if (!cart) {
+        //     return res.status(500).send({
+        //         success: false,
+        //         message: "please food cart or payemnt method",
+        //     });
+        // }
         if (!cart) {
-            return res.status(500).send({
-                success: false,
-                message: "please food cart or payemnt method",
-            });
+            throw new AppError("please food cart or payemnt method", 500);
         }
         let total = 0;
         //cal
@@ -272,11 +277,14 @@ const placeOrderController = async (req, res) => {
 const orderStatusController = async (req, res) => {
     try {
         const orderId = req.params.id;
+        // if (!orderId) {
+        //     return res.status(404).send({
+        //         success: false,
+        //         message: "Please Provide valid order id",
+        //     });
+        // }
         if (!orderId) {
-            return res.status(404).send({
-                success: false,
-                message: "Please Provide valid order id",
-            });
+            throw new AppError("Please Provide valid order id", 404);
         }
         const { status } = req.body;
         const order = await orderModel.findByIdAndUpdate(

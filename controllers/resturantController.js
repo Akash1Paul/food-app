@@ -1,5 +1,5 @@
 const restrurantModel = require("../models/restrurantModel");
-
+const AppError = require("../utils/AppError");
 // CREATE RESTURANT
 const createRssturantController = async (req, res) => {
     try {
@@ -32,11 +32,14 @@ const createRssturantController = async (req, res) => {
 const getAllResturantController = async (req, res) => {
     try {
         const resturants = await restrurantModel.find({});
-        if (!resturants) {
-            return res.stataus(404).send({
-                success: false,
-                message: 'No Resturant Available'
-            })
+        // if (!resturants) {
+        //     return res.stataus(404).send({
+        //         success: false,
+        //         message: 'No Resturant Available'
+        //     })
+        // }
+        if (!restaurant) {
+            throw new AppError("No Resturant Available", 404);
         }
         res.status(200).send({
             success: true,
@@ -57,11 +60,14 @@ const getAllResturantController = async (req, res) => {
 const getResturantByIdController = async (req, res) => {
     try {
         const resturantId = req.params.id;
+        // if (!resturantId) {
+        //     return res.status(404).send({
+        //         success: false,
+        //         message: 'Please Provide Resturant ID'
+        //     });
+        // }
         if (!resturantId) {
-            return res.status(404).send({
-                success: false,
-                message: 'Please Provide Resturant ID'
-            });
+            throw new AppError("Please Provide Resturant ID", 404);
         }
         // find resturant
         const resturant = await restrurantModel.findById(resturantId);
@@ -86,14 +92,17 @@ const getResturantByIdController = async (req, res) => {
 };
 
 // DELETE RESTURANT
-const deleteResturantController = async(req, res) =>{
+const deleteResturantController = async (req, res) => {
     try {
         const resturantId = req.params.id;
-         if (!resturantId) {
-            return res.status(404).send({
-                success: false,
-                message: 'No Resturant Found OR Provide Resturant ID'
-            });
+        // if (!resturantId) {
+        //     return res.status(404).send({
+        //         success: false,
+        //         message: 'No Resturant Found OR Provide Resturant ID'
+        //     });
+        // }
+        if (!resturantId) {
+            throw new AppError("No Resturant Found OR Provide Resturant ID", 404);
         }
         await restrurantModel.findByIdAndDelete(resturantId);
         res.status(200).send({

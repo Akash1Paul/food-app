@@ -6,7 +6,7 @@ const dotenv = require('dotenv');
 const connectDb = require('./config/db');
 const multer = require("multer");
 const path = require("path");
-
+const errorHandler = require("./middlewares/errorHandler");
 //dot env configuration
 dotenv.config();
 
@@ -53,9 +53,13 @@ app.use('/api/v1/resturant', require('./routes/resturantRoutes'));
 app.use("/api/v1/category", require("./routes/catgeoryRoutes"));
 app.use("/api/v1/food", require("./routes/foodRoutes"));
 
+
+
 app.get('/', (req, res) => {
     return res.status(200).send("<h1>Welcome to Food Server APP API BASE PROJECT </h1>")
 });
+
+app.use(errorHandler);
 
 //POST
 const PORT = process.env.PORT || 5000;

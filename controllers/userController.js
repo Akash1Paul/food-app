@@ -1,6 +1,7 @@
 const userModel = require("../models/userModel");
 const bcrypt = require('bcryptjs');
 const JWT = require('jsonwebtoken');
+const AppError = require("../utils/AppError");
 // GET USER INFO
 const getUserController = async (req, res) => {
     try {
@@ -8,10 +9,7 @@ const getUserController = async (req, res) => {
         const user = await userModel.findById({ _id: req.user.id });
         //validation
         if (!user) {
-            return res.status(404).send({
-                success: false,
-                message: 'User Not Found',
-            })
+            throw new AppError("User not found", 404);
         }
         //hide password
         user.password = undefined
@@ -38,10 +36,7 @@ const updateUserController = async (req, res) => {
         const user = await userModel.findById({ _id: req.user.id });
         // validation
         if (!user) {
-            return res.status(404).send({
-                success: false,
-                message: 'User Not Found',
-            })
+            throw new AppError("User not found", 404);
         }
         //update
         const { userName, address, phone } = req.body
@@ -107,10 +102,7 @@ const updatePasswordController = async (req, res) => {
         const user = await userModel.findById(req.user.id);
         //validation
         if (!user) {
-            return res.status(404).send({
-                success: false,
-                message: 'User Not Found',
-            });
+            throw new AppError("User not found", 404);
         }
         // get data from user
         const { oldPassword, newPassword } = req.body
