@@ -4,7 +4,8 @@ const cors = require("cors");
 const morgan = require("morgan");
 const dotenv = require('dotenv');
 const connectDb = require('./config/db');
-
+const multer = require("multer");
+const path = require("path");
 
 //dot env configuration
 dotenv.config();
@@ -14,6 +15,30 @@ connectDb();
 
 //rest object
 const app = express();
+
+// Where uploaded files will be stored
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "uploads/");
+    },
+
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage: storage });
+
+// Upload single file
+app.post("/upload", upload.array("files", 5), (req, res) => {
+    console.log(req.files);
+
+    res.json({
+        message: "Files uploaded successfully",
+        files: req.files
+    });
+});
+
 
 //middlewares
 app.use(cors());
