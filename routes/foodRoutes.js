@@ -38,8 +38,8 @@ router.delete("/delete/:id", authMiddleware, deleteFoodController);
 router.post("/placeorder", authMiddleware, placeOrderController);
 
 // ORDER STATUS
-router.post(
-    "/orderStatus/:id",
+router.patch(
+    "/orders/:id/status",
     authMiddleware,
     adminMiddleware,
     orderStatusController

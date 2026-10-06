@@ -23,8 +23,9 @@ const foodSchema = new mongoose.Schema(
         foodTags: {
             type: String,
         },
-        catgeory: {
-            type: String,
+        category: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Category"
         },
         code: {
             type: String,

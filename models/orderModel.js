@@ -14,6 +14,7 @@ const ordersSchema = new mongoose.Schema(
             enum: ["preparing", "prepare", "on the way", "deliverd"],
             default: "preparing",
         },
+        amount: Number
     },
     { timestamps: true }
 );

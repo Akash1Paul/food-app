@@ -60,24 +60,15 @@ const updateUserController = async (req, res) => {
 };
 
 // RESET PASSWORD
-const resetPasswordController = async (req, res) => {
+const resetPasswordController = async (req, res, next) => {
     try {
         const { email, newPassword, answer } = req.body;
-        if (!email || !newPassword || !answer) {
-            return res.status(500).send({
-                success: false,
-                message: 'Please Provide All Feilds'
-            });
-        }
         const user = await userModel.findOne({ email, answer })
         if (!user) {
-            return res.status(500).send({
-                success: false,
-                message: 'User Not Found or invalid answer'
-            })
+            throw new AppError("User Not Found or invalid answer", 404);
         }
         // hashing password
-        var salt = bcrypt.genSaltSync(10);
+        var salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
         user.password = hashedPassword
         await user.save()
@@ -85,13 +76,8 @@ const resetPasswordController = async (req, res) => {
             success: true,
             message: "Password Reset Successfully"
         })
-    } catch (err) {
-        console.log(err)
-        res.status(500).send({
-            success: false,
-            message: 'Error in password reset',
-            err
-        })
+    } catch (error) {
+        next(error);
     }
 };
 

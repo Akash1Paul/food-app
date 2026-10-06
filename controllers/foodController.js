@@ -274,35 +274,40 @@ const placeOrderController = async (req, res) => {
 };
 
 // CHANGE ORDER STATUS
-const orderStatusController = async (req, res) => {
+const orderStatusController = async (req, res, next) => {
     try {
         const orderId = req.params.id;
-        // if (!orderId) {
-        //     return res.status(404).send({
-        //         success: false,
-        //         message: "Please Provide valid order id",
-        //     });
-        // }
+
         if (!orderId) {
-            throw new AppError("Please Provide valid order id", 404);
+            throw new AppError("Please provide valid order id", 400);
         }
-        const { status } = req.body;
+
+        const { status } = req.body || {};
+
+        if (!status) {
+            throw new AppError("Please provide order status", 400);
+        }
+
         const order = await orderModel.findByIdAndUpdate(
             orderId,
             { status },
             { new: true }
-        );
+        )
+            .populate("buyer", "name email")
+            .populate("foods", "name price");
+
+        if (!order) {
+            throw new AppError("Order not found", 404);
+        }
+
         res.status(200).send({
             success: true,
             message: "Order Status Updated",
+            order
         });
+
     } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            success: false,
-            message: "Error In Order Status API",
-            error,
-        });
+        next(error);
     }
 };
 

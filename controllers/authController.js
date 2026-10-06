@@ -74,13 +74,18 @@ const loginController = async (req, res, next) => {
         }
         //token
         const token = JWT.sign({ id: user._id }, process.env.JWT_SECRET, {
-            expiresIn: '7d',
+            expiresIn: '7d', //15s
         })
+        const refreshToken = JWT.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, {
+            expiresIn: "7d"
+        }
+        );
         user.password = undefined;
         res.status(200).send({
             success: true,
             message: 'Login Successfully',
             token,
+            refreshToken,
             user,
         })
     } catch (error) {
