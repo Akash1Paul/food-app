@@ -311,6 +311,67 @@ const orderStatusController = async (req, res, next) => {
     }
 };
 
+const totalSalesController = async (req, res, next) => {
+    try {
+        const result = await orderModel.aggregate([
+            {
+                $match: {
+                    status: "Delivered"
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalSales: {
+                        $sum: "$amount"
+                    }
+                }
+            }
+        ]);
+
+        res.status(200).send({
+            success: true,
+            totalSales: result[0]?.totalSales || 0
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+const salesByRestaurantController = async (req, res, next) => {
+    try {
+        const result = await orderModel.aggregate([
+            {
+                $match: {
+                    status: "Delivered"
+                }
+            },
+            {
+                $group: {
+                    _id: "$restaurant",
+                    totalSales: {
+                        $sum: "$amount"
+                    }
+                }
+            },
+            {
+                $sort: {
+                    totalSales: -1
+                }
+            }
+        ]);
+
+        res.status(200).send({
+            success: true,
+            data: result
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     createFoodController,
     getAllFoodsController,
@@ -320,4 +381,6 @@ module.exports = {
     deleteFoodController,
     placeOrderController,
     orderStatusController,
+    totalSalesController,
+    salesByRestaurantController
 };

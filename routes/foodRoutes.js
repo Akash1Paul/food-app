@@ -10,6 +10,8 @@ const {
     deleteFoodController,
     placeOrderController,
     orderStatusController,
+    totalSalesController,
+    salesByRestaurantController
 } = require("../controllers/foodController");
 const adminMiddleware = require("../middlewares/adminMiddleware");
 
@@ -43,6 +45,20 @@ router.patch(
     authMiddleware,
     adminMiddleware,
     orderStatusController
+);
+
+router.get(
+    "/admin/total-sales",
+    authMiddleware,
+    adminMiddleware,
+    totalSalesController
+);
+
+router.get(
+    "/admin/sales-by-restaurant",
+    authMiddleware,
+    adminMiddleware,
+    salesByRestaurantController
 );
 
 module.exports = router;

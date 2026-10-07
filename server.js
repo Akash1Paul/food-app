@@ -52,6 +52,7 @@ app.use('/api/v1/user', require('./routes/userRoutes'));
 app.use('/api/v1/resturant', require('./routes/resturantRoutes'));
 app.use("/api/v1/category", require("./routes/catgeoryRoutes"));
 app.use("/api/v1/food", require("./routes/foodRoutes"));
+app.use("/api/v1/admin/dashboard", require("./routes/dashboardRoutes"));
 
 
 
