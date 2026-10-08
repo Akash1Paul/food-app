@@ -1,14 +1,15 @@
-const mongoose = require('mongoose');
-const colors = require("colors");
+const mongoose = require("mongoose");
 
-//function mongodb database connection
-const connectDb = async () => {
+const connectDb = async (uri = process.env.MONGO_URL) => {
     try {
-        await mongoose.connect(process.env.MONGO_URL);
-        console.log(`Connected To Database ${mongoose.connection.host} `.bgCyan);
-    }
-    catch (error) {
-        console.log('DB Error', error);
+        await mongoose.connect(uri);
+
+        console.log(
+            `Connected To Database ${mongoose.connection.host}`
+        );
+    } catch (error) {
+        console.error("DB Error:", error.message);
+        throw error; // IMPORTANT
     }
 };
 

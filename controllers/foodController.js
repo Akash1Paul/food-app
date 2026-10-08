@@ -54,25 +54,32 @@ const createFoodController = async (req, res) => {
 };
 
 // GET ALLL FOODS
-const getAllFoodsController = async (req, res) => {
+const getAllFoodsController = async (req, res, next) => {
     try {
-        const foods = await foodModal.find({});
-        if (!foods) {
-            throw new AppError("no food items was found", 404);
-        }
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
+
+        const skip = (page - 1) * limit;
+
+        const foods = await foodModal
+            .find({})
+            .skip(skip)
+            .limit(limit);
+
+        const total = await foodModal.countDocuments();
 
         res.status(200).send({
             success: true,
-            totalFoods: foods.length,
-            foods,
+            data: foods,
+            pagination: {
+                page,
+                limit,
+                total
+            }
         });
+
     } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            success: false,
-            message: "Erro In Get ALL Foods API",
-            error,
-        });
+        next(error);
     }
 };
 
