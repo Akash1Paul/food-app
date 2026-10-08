@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const foodModal = require("../models/foodModal");
 const orderModel = require("../models/orderModel");
 const AppError = require("../utils/AppError");
@@ -234,45 +235,72 @@ const deleteFoodController = async (req, res) => {
 };
 
 // PLACE ORDER
-const placeOrderController = async (req, res) => {
-    try {
-        const { cart } = req.body;
-        // if (!cart) {
-        //     return res.status(500).send({
-        //         success: false,
-        //         message: "please food cart or payemnt method",
-        //     });
-        // }
-        if (!cart) {
-            throw new AppError("please food cart or payemnt method", 500);
-        }
-        let total = 0;
-        //cal
-        cart.map((i) => {
-            total += i.price;
-        });
+const placeOrderController = async (req, res, next) => {
+    const session = await mongoose.startSession();
 
-        const newOrder = new orderModel({
-            foods: cart,
-            payment: total,
-            buyer: req.body.id,
-        });
-        await newOrder.save();
+    try {
+        // Start transaction
+        session.startTransaction();
+
+        const userId = req.user.id;
+        const { foodId, quantity } = req.body;
+
+        // 1. Find food
+        const food = await foodModel
+            .findById(foodId)
+            .session(session);
+
+        if (!food) {
+            throw new AppError("Food not found", 404);
+        }
+
+        // 2. Check stock
+        if (food.stock < quantity) {
+            throw new AppError("Not enough food stock", 400);
+        }
+
+        // 3. Calculate amount
+        const totalAmount = food.price * quantity;
+
+        // 4. Create order
+        const order = await orderModel.create(
+            [{
+                buyer: userId,
+                foods: [foodId],
+                quantity: quantity,
+                amount: totalAmount,
+                status: "Pending"
+            }],
+            { session }
+        );
+
+        // 5. Reduce stock
+        food.stock -= quantity;
+
+        await food.save({ session });
+
+        // 6. Everything succeeded
+        await session.commitTransaction();
+
         res.status(201).send({
             success: true,
-            message: "Order Placed successfully",
-            newOrder,
+            message: "Order placed successfully",
+            order: order[0]
         });
+
     } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            success: false,
-            message: "Erorr In Place Order API",
-            error,
-        });
+
+        // Something failed → rollback
+        await session.abortTransaction();
+
+        next(error);
+
+    } finally {
+
+        // Close session
+        session.endSession();
     }
 };
-
 // CHANGE ORDER STATUS
 const orderStatusController = async (req, res, next) => {
     try {
@@ -371,6 +399,7 @@ const salesByRestaurantController = async (req, res, next) => {
         next(error);
     }
 };
+
 
 module.exports = {
     createFoodController,
