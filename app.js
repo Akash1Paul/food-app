@@ -4,7 +4,7 @@ const morgan = require("morgan");
 const multer = require("multer");
 const path = require("path");
 const crypto = require("crypto");
-
+const requestId = require("./middlewares/requestId");
 const errorHandler = require("./middlewares/errorHandler");
 
 const app = express();
@@ -67,6 +67,7 @@ app.post(
     }
 );
 
+app.use(requestId);
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
