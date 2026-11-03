@@ -19,6 +19,9 @@ const io = new Server(httpServer, {
     }
 });
 
+// Make Socket.IO available to Express controllers
+app.set("io", io);
+
 // Socket connection
 io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
